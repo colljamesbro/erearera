@@ -1,0 +1,34 @@
+local player = game.Players.LocalPlayer
+local userInput = game:GetService("UserInputService")
+
+-- Function to set spawn point
+local function setSpawnPoint()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local spawnLocation = humanoidRootPart.Position
+
+    -- Store the spawn point in a Value (could also save it in DataStore for persistence)
+    if not player:FindFirstChild("SpawnPoint") then
+        local spawnPointValue = Instance.new("Vector3Value")
+        spawnPointValue.Name = "SpawnPoint"
+        spawnPointValue.Parent = player
+    end
+    player.SpawnPoint.Value = spawnLocation
+
+    print("Spawn point set to:", spawnLocation)
+end
+
+-- Detect Ctrl key press
+userInput.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.LeftControl then
+        setSpawnPoint()
+    end
+end)
+
+-- Respawn at the custom spawn point
+player.CharacterAdded:Connect(function(character)
+    if player:FindFirstChild("SpawnPoint") then
+        local spawnLocation = player.SpawnPoint.Value
+        character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(spawnLocation)
+    end
+end)
